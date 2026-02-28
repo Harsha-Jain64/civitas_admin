@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Operations Dashboard</title>
+    <link rel="stylesheet" href="style1.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="main-header">
+    <div class="header-container">
+
+        <!-- Title -->
+        <div class="website-name">
+            🏛️ Civitas | ADMIN
+        </div>
+
+        <!-- Navigation -->
+        <nav class="main-nav">
+            <a href="#" class="nav-item active">Grievance Management</a>
+            <a href="#" class="nav-item">Field Operations</a>
+            <a href="#" class="nav-item">Development</a>
+            <a href="#" class="nav-item">Reports and Citizen Engagement</a>
+        </nav>
+
+        <!-- Right Meta -->
+        <div class="header-info">
+            <span class="admin-label">Admin Portal</span>
+            <span id="liveDateTime"></span>
+        </div>
+
+    </div>
+
+    <!-- Tricolour -->
+    <div class="tricolor-bar">
+        <span class="clr-saffron"></span>
+        <span class="clr-white"></span>
+        <span class="clr-green"></span>
+    </div>
+</header>
+
+
+<!-- ================= PAGE CONTENT ================= -->
+<main class="dashboard-container">
+
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <h1>Welcome, Admin</h1>
+        <p class="update-note"><h4>Greetings User! Here's your unified summary.</h4> </p>
+    </section>
+
+
+    <!-- Overview Boxes -->
+    <section class="box-grid">
+
+        <div class="box-card">
+            <div class="box-label">Total Grievances (This Month)</div>
+            <div class="box-number"> 1,297</div>
+            <div class="box-sub"> +18 today</div>
+        </div>
+
+        <div class="box-card warning">
+            <div class="box-label">Pending Cases</div>
+            <div class="box-number">318</div>
+            <div class="box-sub">42 overdue</div>
+        </div>
+
+        <div class="box-card success">
+            <div class="box-label">Resolved Cases</div>
+            <div class="box-number">979</div>
+            <div class="box-sub">76% resolution rate</div>
+        </div>
+
+        <div class="box-card info">
+            <div class="box-label">Citizen Happiness Index</div>
+            <div class="box-number">76%</div>
+            <div class="box-sub">Based on 412 ratings</div>
+        </div>
+
+    </section>
+
+
+    
+    <section class="insights">
+
+        <!-- Map Panel -->
+            <div class="panel map-panel">
+                <div class="panel-title">Complaint Distribution by Zone</div>
+                <div class="panel-body">
+                    <div id="cityMap"></div>
+                    <div class="map-category">
+                        <span><img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png"> High</span>
+                        <span><img src="https://maps.google.com/mapfiles/ms/icons/orange-dot.png"> Medium</span>
+                        <span><img src="https://maps.google.com/mapfiles/ms/icons/green-dot.png"> Low</span>
+                    </div>
+                </div>
+            </div>
+        
+
+        <!-- Status Panel -->
+        <div class="panel status-panel"> 
+            <div class="panel-title">Monthly Complaints Trend (Registered vs Resolved)</div>
+            <div class="panel-body">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="main-footer">
+    <div class="footer-content">
+        <div class="footer-left">
+            © 2026 Civitas | AdminPortal
+        </div>
+
+        <div class="footer-right">
+            Help Desk
+        </div>
+    </div>
+</footer>
+
+
+<!-- ================= LIVE DATE TIME ================= -->
+<script>
+function updateTime() {
+    const now = new Date();
+    const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+    const date = now.toLocaleDateString('en-IN', dateOptions);
+    const time = now.toLocaleTimeString();
+    document.getElementById('liveDateTime').textContent = date + " | " + time;
+}
+setInterval(updateTime, 1000);
+updateTime();
+</script>
+
+<script>
+// Custom icons for complaint intensity
+const highIcon = L.icon({
+    iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -30]
+});
+
+const mediumIcon = L.icon({
+    iconUrl: 'https://maps.google.com/mapfiles/ms/icons/orange-dot.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -30]
+});
+
+const lowIcon = L.icon({
+    iconUrl: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -30]
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const map = L.map('cityMap').setView([28.6139, 77.2090], 11);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Sample complaint intensity data
+    const grievanceData = [
+        {
+            lat: 28.7041,
+            lng: 77.1025,
+            ward: "Ward 12",
+            complaints: 42,
+            level: "high"
+        },
+        {
+            lat: 28.5355,
+            lng: 77.3910,
+            ward: "Ward 18",
+            complaints: 18,
+            level: "medium"
+        },
+        {
+            lat: 28.4595,
+            lng: 77.0266,
+            ward: "Ward 22",
+            complaints: 6,
+            level: "low"
+        }
+    ];
+
+    grievanceData.forEach(area => {
+
+        let iconType;
+
+        if (area.level === "high") iconType = highIcon;
+        else if (area.level === "medium") iconType = mediumIcon;
+        else iconType = lowIcon;
+
+        L.marker([area.lat, area.lng], { icon: iconType })
+            .addTo(map)
+            .bindPopup(
+                `<strong>${area.ward}</strong><br>
+                 Complaints: ${area.complaints}`
+            );
+    });
+
+});
+</script>
+
+
+
+<script>
+document.getElementById("footerDate").textContent =
+    new Date().toLocaleDateString('en-IN');
+</script>
+
+<script>
+const trendCtx = document.getElementById('trendChart');
+
+new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+
+        datasets: [
+            {
+                label: 'Registered Complaints',
+                data: [820, 910, 870, 960, 1020, 1090],
+                borderColor: '#dc2626',
+                backgroundColor: 'rgba(220,38,38,0.08)',
+                tension: 0.35,
+                fill: true,
+                pointRadius: 4
+            },
+            {
+                label: 'Resolved Complaints',
+                data: [760, 840, 820, 900, 970, 1040],
+                borderColor: '#16a34a',
+                backgroundColor: 'rgba(22,163,74,0.08)',
+                tension: 0.35,
+                fill: true,
+                pointRadius: 4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    padding: 20,
+                    boxWidth: 10,
+                    font: {
+                        size: 12
+                    }
+                }
+            }
+        },
+
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Month'
+                },
+                grid: {
+                    display: false
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Number of Grievances'
+                },
+                grid: {
+                    color: '#e5e7eb'
+                }
+            }
+        }
+    }
+});
+</script>
+
+</body>
+</html>
